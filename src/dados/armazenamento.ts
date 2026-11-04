@@ -3,17 +3,35 @@
 import type { Dados } from '../tipos.ts';
 
 const CHAVE = 'sementinha:v1';
-export const VAZIO: Dados = { perfis: [], perfilAtivoId: null, progresso: {} };
+
+export const VAZIO: Dados = {
+  perfis: [],
+  perfilAtivoId: null,
+  progresso: {},
+  videos: [],
+  desligados: [],
+  uso: {},
+  extras: {},
+  vistos: {},
+};
+
+const ehObjeto = (v: unknown): v is Record<string, never> => !!v && typeof v === 'object' && !Array.isArray(v);
 
 export function lerDados(): Dados {
   try {
     const texto = localStorage.getItem(CHAVE);
     if (!texto) return VAZIO;
-    const dados = JSON.parse(texto) as Partial<Dados>;
+    const d = JSON.parse(texto) as Partial<Dados>;
+    // Cada parte é conferida: dados de versões antigas do app continuam abrindo.
     return {
-      perfis: Array.isArray(dados.perfis) ? dados.perfis : [],
-      perfilAtivoId: typeof dados.perfilAtivoId === 'string' ? dados.perfilAtivoId : null,
-      progresso: dados.progresso && typeof dados.progresso === 'object' ? dados.progresso : {},
+      perfis: Array.isArray(d.perfis) ? d.perfis : [],
+      perfilAtivoId: typeof d.perfilAtivoId === 'string' ? d.perfilAtivoId : null,
+      progresso: ehObjeto(d.progresso) ? d.progresso : {},
+      videos: Array.isArray(d.videos) ? d.videos : [],
+      desligados: Array.isArray(d.desligados) ? d.desligados : [],
+      uso: ehObjeto(d.uso) ? d.uso : {},
+      extras: ehObjeto(d.extras) ? d.extras : {},
+      vistos: ehObjeto(d.vistos) ? d.vistos : {},
     };
   } catch {
     return VAZIO;

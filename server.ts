@@ -47,6 +47,31 @@ app.get('/api/health', (_req, res) => {
   res.set('Cache-Control', 'no-store').json({ ok: true });
 });
 
+// ---------- Título do vídeo ----------
+// Os pais colam o link e o servidor pergunta o título ao YouTube (oEmbed, sem chave).
+// Guarda na memória para não perguntar de novo. Nenhum dado da criança passa por aqui.
+const titulos = new Map<string, string>();
+
+app.get('/api/video-info', async (req, res) => {
+  const id = String(req.query.id ?? '');
+  if (!/^[\w-]{11}$/.test(id)) return res.status(400).json({ erro: 'Código de vídeo inválido' });
+  res.set('Cache-Control', 'private, max-age=86400');
+  const guardado = titulos.get(id);
+  if (guardado) return res.json({ titulo: guardado });
+  try {
+    const url = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) return res.status(404).json({ erro: 'Vídeo não encontrado ou não permite incorporar' });
+    const j = (await r.json()) as { title?: string };
+    const titulo = String(j.title ?? '').slice(0, 120);
+    if (titulos.size > 2000) titulos.clear();
+    titulos.set(id, titulo);
+    res.json({ titulo });
+  } catch {
+    res.status(502).json({ erro: 'YouTube não respondeu' });
+  }
+});
+
 async function iniciar() {
   const distPath = path.join(ROOT_DIR, 'dist');
 
