@@ -65,7 +65,7 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
 
   // Ao aparecer cada pergunta, o app fala o pedido.
   useEffect(() => {
-    if (fase === 'pergunta') falar(alvo.pedido);
+    if (fase === 'pergunta') falar(alvo.fala);
   }, [alvo, fase]);
 
   const proxima = useCallback(() => {
@@ -95,7 +95,7 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
       setErrouNessa(true);
       setTremendo(item.id);
       setTimeout(() => setTremendo(null), 450);
-      falar(`Esse é ${item.nome}. ${alvo.pedido}`);
+      falar(`${item.nome} ${alvo.fala}`);
     }
   }
 
@@ -120,7 +120,7 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
         </button>
         <Bolinhas total={PERGUNTAS_POR_RODADA} feitas={fase === 'fim' ? PERGUNTAS_POR_RODADA : numero + (fase === 'certo' ? 1 : 0)} />
         <button
-          onClick={() => falar(alvo.pedido)}
+          onClick={() => falar(alvo.fala)}
           aria-label="Ouvir de novo"
           className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-4xl shadow active:scale-95"
         >

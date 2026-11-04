@@ -1,9 +1,13 @@
 // Conteúdo dos jogos. Para criar um jogo novo, basta uma lista assim.
+//
+// Texto da tela x texto falado: a voz do aparelho lê "O" sozinho como o artigo "o" (som de "u").
+// Por isso o que é FALADO usa a pronúncia escrita: "á", "é", "i", "ó", "u" (com acento = som aberto).
 export type ItemJogo = {
   id: string;
-  nome: string; // como o app chama o item ("o A", "o azul")
-  pedido: string; // o que o app fala para pedir
-  reforco: string; // o que o app fala quando acerta
+  pedido: string; // o que aparece escrito na tela ("Toque no O!")
+  fala: string; // o que a voz fala para pedir ("Toque na letra ó!")
+  nome: string; // o que a voz fala quando a criança toca nele por engano ("Essa é a letra ó.")
+  reforco: string; // o que a voz fala quando acerta
   emoji: string; // desenho que aparece junto do reforço
   palavra: string; // palavra que aparece junto do desenho
   cor?: string; // só no jogo das cores
@@ -11,21 +15,47 @@ export type ItemJogo = {
 
 export type JogoId = 'vogais' | 'cores';
 
+function vogal(id: string, som: string, palavra: string, emoji: string): ItemJogo {
+  const letra = id.toUpperCase();
+  return {
+    id,
+    pedido: `Toque no ${letra}!`,
+    fala: `Toque na letra ${som}!`,
+    nome: `Essa é a letra ${som}.`,
+    reforco: `${som}... de ${palavra.toLowerCase()}!`,
+    emoji,
+    palavra,
+  };
+}
+
 export const VOGAIS: ItemJogo[] = [
-  { id: 'a', nome: 'o A', pedido: 'Toque no A!', reforco: 'A de abelha!', emoji: '🐝', palavra: 'Abelha' },
-  { id: 'e', nome: 'o E', pedido: 'Toque no E!', reforco: 'E de elefante!', emoji: '🐘', palavra: 'Elefante' },
-  { id: 'i', nome: 'o I', pedido: 'Toque no I!', reforco: 'I de igreja!', emoji: '⛪', palavra: 'Igreja' },
-  { id: 'o', nome: 'o O', pedido: 'Toque no O!', reforco: 'O de ovo!', emoji: '🥚', palavra: 'Ovo' },
-  { id: 'u', nome: 'o U', pedido: 'Toque no U!', reforco: 'U de uva!', emoji: '🍇', palavra: 'Uva' },
+  vogal('a', 'á', 'Abelha', '🐝'),
+  vogal('e', 'é', 'Elefante', '🐘'),
+  vogal('i', 'i', 'Igreja', '⛪'),
+  vogal('o', 'ó', 'Ovo', '🥚'),
+  vogal('u', 'u', 'Uva', '🍇'),
 ];
 
+function cor(id: string, palavra: string, comoO: string, emoji: string, hex: string): ItemJogo {
+  return {
+    id,
+    pedido: `Toque no ${id}!`,
+    fala: `Toque no ${id}!`,
+    nome: `Esse é o ${id}.`,
+    reforco: `${palavra}, como ${comoO}!`,
+    emoji,
+    palavra,
+    cor: hex,
+  };
+}
+
 export const CORES: ItemJogo[] = [
-  { id: 'vermelho', nome: 'o vermelho', pedido: 'Toque no vermelho!', reforco: 'Vermelho, como o morango!', emoji: '🍓', palavra: 'Vermelho', cor: '#e24b4a' },
-  { id: 'azul', nome: 'o azul', pedido: 'Toque no azul!', reforco: 'Azul, como o mar!', emoji: '🌊', palavra: 'Azul', cor: '#2f7fd6' },
-  { id: 'amarelo', nome: 'o amarelo', pedido: 'Toque no amarelo!', reforco: 'Amarelo, como o sol!', emoji: '🌞', palavra: 'Amarelo', cor: '#f5c518' },
-  { id: 'verde', nome: 'o verde', pedido: 'Toque no verde!', reforco: 'Verde, como a árvore!', emoji: '🌳', palavra: 'Verde', cor: '#4f9a1e' },
-  { id: 'laranja', nome: 'o laranja', pedido: 'Toque no laranja!', reforco: 'Laranja, como a laranja!', emoji: '🍊', palavra: 'Laranja', cor: '#f07d1a' },
-  { id: 'roxo', nome: 'o roxo', pedido: 'Toque no roxo!', reforco: 'Roxo, como a uva!', emoji: '🍇', palavra: 'Roxo', cor: '#7f4fc9' },
+  cor('vermelho', 'Vermelho', 'o morango', '🍓', '#e24b4a'),
+  cor('azul', 'Azul', 'o mar', '🌊', '#2f7fd6'),
+  cor('amarelo', 'Amarelo', 'o sol', '🌞', '#f5c518'),
+  cor('verde', 'Verde', 'a árvore', '🌳', '#4f9a1e'),
+  cor('laranja', 'Laranja', 'a laranja', '🍊', '#f07d1a'),
+  cor('roxo', 'Roxo', 'a uva', '🍇', '#7f4fc9'),
 ];
 
 export const JOGOS: Record<JogoId, { titulo: string; itens: ItemJogo[] }> = {
