@@ -63,7 +63,7 @@ export function Salinha(props: Props) {
   useEffect(() => {
     if (!acabouTempo) return;
     setAberta(null);
-    falar(`${perfil.apelido}, hora de descansar! Amanhã a gente brinca mais.`);
+    falar(`${perfil.apelido}, hora de descansar! Amanhã a gente brinca mais.`, { interromper: true });
   }, [acabouTempo, perfil.apelido]);
 
   if (acabouTempo) {
@@ -74,7 +74,7 @@ export function Salinha(props: Props) {
 
   function tocar(id: AtividadeId, fala: string) {
     setTocado(id);
-    falar(fala);
+    falar(fala, { interromper: true });
     window.setTimeout(() => {
       setTocado(null);
       setAberta(id);
@@ -103,7 +103,7 @@ export function Salinha(props: Props) {
       <BotaoPais aoChamarPais={aoChamarPais} />
 
       <button
-        onClick={() => falar(`Oi, ${perfil.apelido}! Vamos aprender brincando?`)}
+        onClick={() => falar(`Oi, ${perfil.apelido}! Vamos aprender brincando?`, { interromper: true })}
         className="mt-2 flex flex-col items-center"
         aria-label="Ouvir o Brotinho"
       >

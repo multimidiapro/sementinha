@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Brotinho } from '../componentes/Brotinho.tsx';
 import type { ProgressoItem } from '../tipos.ts';
-import { falar } from '../util/voz.ts';
+import { falar, parar } from '../util/voz.ts';
 import { JOGOS, type ItemJogo, type JogoId } from './conteudo.ts';
 
 const PERGUNTAS_POR_RODADA = 5;
@@ -58,14 +58,27 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
   const [fase, setFase] = useState<Fase>('pergunta');
   const [errouNessa, setErrouNessa] = useState(false);
   const [tremendo, setTremendo] = useState<string | null>(null);
-  const espera = useRef<number | undefined>(undefined);
+  const vivo = useRef(true);
 
-  // Saiu do jogo no meio da comemoração: cancela a próxima pergunta.
-  useEffect(() => () => window.clearTimeout(espera.current), []);
-
-  // Ao aparecer cada pergunta, o app fala o pedido.
+  // Saiu do jogo: não passa para a próxima pergunta.
   useEffect(() => {
-    if (fase === 'pergunta') falar(alvo.fala);
+    vivo.current = true;
+    return () => {
+      vivo.current = false;
+    };
+  }, []);
+
+  function sair() {
+    parar();
+    aoSair();
+  }
+
+  // Ao aparecer cada pergunta, o app fala o pedido (uma vez só, mesmo que a tela redesenhe).
+  const pedidoFalado = useRef<ItemJogo | null>(null);
+  useEffect(() => {
+    if (fase !== 'pergunta' || pedidoFalado.current === alvo) return;
+    pedidoFalado.current = alvo;
+    falar(alvo.fala);
   }, [alvo, fase]);
 
   const proxima = useCallback(() => {
@@ -88,14 +101,17 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
     if (item.id === alvo.id) {
       aoResponder(`${jogo}:${alvo.id}`, !errouNessa, false);
       setFase('certo');
-      falar(`Isso! ${alvo.reforco}`);
-      espera.current = window.setTimeout(proxima, 2200);
+      // Espera o elogio terminar (e no mínimo 1,8 s de festa) antes da próxima pergunta.
+      const minimo = new Promise((r) => setTimeout(r, 1800));
+      Promise.all([falar(`Isso! ${alvo.reforco}`, { interromper: true }), minimo]).then(() => {
+        if (vivo.current) window.setTimeout(() => vivo.current && proxima(), 300);
+      });
     } else {
       if (!errouNessa) aoResponder(`${jogo}:${alvo.id}`, false, true);
       setErrouNessa(true);
       setTremendo(item.id);
       setTimeout(() => setTremendo(null), 450);
-      falar(`${item.nome} ${alvo.fala}`);
+      falar(`${item.nome} ${alvo.fala}`, { interromper: true });
     }
   }
 
@@ -112,7 +128,7 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
     <main className="sem-selecao relative flex min-h-full flex-col items-center px-5 pb-8 pt-4">
       <div className="flex w-full max-w-4xl items-center justify-between">
         <button
-          onClick={aoSair}
+          onClick={sair}
           aria-label="Voltar para a salinha"
           className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-4xl shadow active:scale-95"
         >
@@ -120,7 +136,7 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
         </button>
         <Bolinhas total={PERGUNTAS_POR_RODADA} feitas={fase === 'fim' ? PERGUNTAS_POR_RODADA : numero + (fase === 'certo' ? 1 : 0)} />
         <button
-          onClick={() => falar(alvo.fala)}
+          onClick={() => falar(alvo.fala, { interromper: true })}
           aria-label="Ouvir de novo"
           className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-4xl shadow active:scale-95"
         >
@@ -138,7 +154,7 @@ export function Jogo({ jogo, estrelas, progresso, aoResponder, aoGanharEstrela, 
             <button onClick={jogarDeNovo} className="rounded-3xl border-b-8 border-black/15 bg-folha px-8 py-5 text-2xl font-extrabold text-white active:translate-y-1 active:border-b-4">
               Jogar de novo
             </button>
-            <button onClick={aoSair} className="rounded-3xl border-b-8 border-black/15 bg-ceu px-8 py-5 text-2xl font-extrabold text-white active:translate-y-1 active:border-b-4">
+            <button onClick={sair} className="rounded-3xl border-b-8 border-black/15 bg-ceu px-8 py-5 text-2xl font-extrabold text-white active:translate-y-1 active:border-b-4">
               🏠
             </button>
           </div>

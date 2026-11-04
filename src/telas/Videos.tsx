@@ -146,7 +146,9 @@ function Moldura({
 }
 
 function TelaFim({ video, aoRepetir, aoVoltar }: { video: Video; aoRepetir: () => void; aoVoltar: () => void }) {
-  useEffect(() => falar('Acabou! Quer ver de novo?'), []);
+  useEffect(() => {
+    falar('Acabou! Quer ver de novo?', { interromper: true });
+  }, []);
   return (
     <div className="sem-selecao fixed inset-0 z-50 flex flex-col items-center justify-center bg-grama px-5 text-center">
       <Miniatura video={video} className="aspect-video w-full max-w-md rounded-3xl shadow-lg" />
