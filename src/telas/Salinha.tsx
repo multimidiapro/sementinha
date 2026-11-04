@@ -5,6 +5,10 @@ import { falar } from '../util/voz.ts';
 import { travarSalinha } from '../util/travar.ts';
 import { Jogo } from '../jogos/Jogo.tsx';
 import type { JogoId } from '../jogos/conteudo.ts';
+import { Alfabeto } from '../jogos/Alfabeto.tsx';
+import { Baloes } from '../jogos/Baloes.tsx';
+import { Memoria } from '../jogos/Memoria.tsx';
+import { Palavras } from '../jogos/Palavras.tsx';
 import { Videos } from './Videos.tsx';
 
 const PASSO_SEGUNDOS = 5;
@@ -22,10 +26,16 @@ type Props = {
   aoChamarPais: () => void;
 };
 
-const ATIVIDADES: { id: AtividadeId; titulo: string; desenho: string; fundo: string; fala: string }[] = [
-  { id: 'vogais', titulo: 'Vogais', desenho: 'AEIOU', fundo: 'bg-folha', fala: 'Vamos brincar com as vogais!' },
-  { id: 'cores', titulo: 'Cores', desenho: '🎨', fundo: 'bg-sol', fala: 'Vamos brincar com as cores!' },
-  { id: 'videos', titulo: 'Vídeos', desenho: '▶', fundo: 'bg-ceu', fala: 'Vamos ver vídeos!' },
+// Os cartões da salinha, na ordem em que aparecem.
+const ATIVIDADES: { id: AtividadeId; titulo: string; desenho: string; cor: string; fala: string }[] = [
+  { id: 'vogais', titulo: 'Vogais', desenho: 'AEIOU', cor: '#639922', fala: 'Vamos brincar com as vogais!' },
+  { id: 'alfabeto', titulo: 'Alfabeto', desenho: 'ABC', cor: '#7f4fc9', fala: 'Vamos conhecer o alfabeto!' },
+  { id: 'som-inicial', titulo: 'Som inicial', desenho: '🐝', cor: '#d4537e', fala: 'Com qual letra começa? Vamos descobrir!' },
+  { id: 'baloes', titulo: 'Balões', desenho: '🎈', cor: '#e24b4a', fala: 'Vamos estourar balões!' },
+  { id: 'palavras', titulo: 'Palavras', desenho: '🧩', cor: '#1d9e75', fala: 'Vamos montar palavras!' },
+  { id: 'memoria', titulo: 'Memória', desenho: '🃏', cor: '#ba7517', fala: 'Vamos jogar memória!' },
+  { id: 'cores', titulo: 'Cores', desenho: '🎨', cor: '#ef9f27', fala: 'Vamos brincar com as cores!' },
+  { id: 'videos', titulo: 'Vídeos', desenho: '▶', cor: '#2f7fd6', fala: 'Vamos ver vídeos!' },
 ];
 
 export function Salinha(props: Props) {
@@ -86,49 +96,48 @@ export function Salinha(props: Props) {
   }
 
   if (aberta) {
-    return (
-      <Jogo
-        jogo={aberta as JogoId}
-        estrelas={perfil.estrelas}
-        progresso={progresso}
-        aoResponder={aoResponder}
-        aoGanharEstrela={aoGanharEstrela}
-        aoSair={() => setAberta(null)}
-      />
-    );
+    const comum = { estrelas: perfil.estrelas, progresso, aoResponder, aoGanharEstrela, aoSair: () => setAberta(null) };
+    if (aberta === 'alfabeto') return <Alfabeto {...comum} />;
+    if (aberta === 'baloes') return <Baloes {...comum} />;
+    if (aberta === 'memoria') return <Memoria {...comum} />;
+    if (aberta === 'palavras') return <Palavras {...comum} />;
+    return <Jogo jogo={aberta as JogoId} {...comum} />;
   }
 
   return (
-    <main className="sem-selecao relative flex min-h-full flex-col items-center justify-center px-5 py-10">
+    <main className="sem-selecao relative flex min-h-full flex-col items-center justify-center px-5 py-8">
       <BotaoPais aoChamarPais={aoChamarPais} />
 
-      <button
-        onClick={() => falar(`Oi, ${perfil.apelido}! Vamos aprender brincando?`, { interromper: true })}
-        className="mt-2 flex flex-col items-center"
-        aria-label="Ouvir o Brotinho"
-      >
-        <Brotinho estrelas={perfil.estrelas} tamanho={140} />
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => falar(`Oi, ${perfil.apelido}! Vamos aprender brincando?`, { interromper: true })}
+          className="flex flex-col items-center"
+          aria-label="Ouvir o Brotinho"
+        >
+          <Brotinho estrelas={perfil.estrelas} tamanho={100} />
+        </button>
+        <div>
+          <h1 className="text-4xl font-black text-folha-escura">
+            Oi, {perfil.apelido}! <span aria-hidden="true">{perfil.bichinho}</span>
+          </h1>
+          <p className="mt-1 flex items-center gap-1 text-xl font-bold text-sol-escuro">
+            <span aria-hidden="true">⭐</span> {perfil.estrelas}
+          </p>
+        </div>
+      </div>
 
-      <h1 className="mt-1 text-center text-4xl font-black text-folha-escura">
-        Oi, {perfil.apelido}! <span aria-hidden="true">{perfil.bichinho}</span>
-      </h1>
-      <p className="mt-1 flex items-center gap-1 text-xl font-bold text-sol-escuro">
-        <span aria-hidden="true">⭐</span> {perfil.estrelas}
-      </p>
-
-      <div className="mt-8 grid w-full max-w-4xl grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="mt-6 grid w-full max-w-5xl grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
         {atividades.map((a, i) => (
           <button
             key={a.id}
             onClick={() => tocar(a.id, a.fala)}
-            style={{ animationDelay: `${i * 80}ms` }}
-            className={`anim-aparecer ${a.fundo} flex aspect-[4/3] flex-col items-center justify-center rounded-[2rem] border-b-8 border-black/15 text-white shadow-lg transition active:translate-y-1 active:border-b-4 sm:aspect-square`}
+            style={{ animationDelay: `${i * 60}ms`, background: a.cor }}
+            className="anim-aparecer flex aspect-[4/3] flex-col items-center justify-center rounded-[2rem] border-b-8 border-black/15 text-white shadow-lg transition active:translate-y-1 active:border-b-4"
           >
             <span className={`text-5xl font-black tracking-wider ${tocado === a.id ? 'anim-pular' : ''}`} aria-hidden="true">
               {a.desenho}
             </span>
-            <span className="mt-3 text-3xl font-extrabold">{a.titulo}</span>
+            <span className="mt-2 text-2xl font-extrabold sm:text-3xl">{a.titulo}</span>
           </button>
         ))}
       </div>

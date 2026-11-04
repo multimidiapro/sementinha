@@ -1,7 +1,9 @@
-// Conteúdo dos jogos. Para criar um jogo novo, basta uma lista assim.
+// Conteúdo dos jogos de "toque no certo". Para criar um jogo novo, basta uma lista assim.
 //
 // Texto da tela x texto falado: a voz do aparelho lê "O" sozinho como o artigo "o" (som de "u").
 // Por isso o que é FALADO usa a pronúncia escrita: "á", "é", "i", "ó", "u" (com acento = som aberto).
+import { LETRAS, VOGAIS_LETRAS, letraDe, type Letra } from './letras.ts';
+
 export type ItemJogo = {
   id: string;
   pedido: string; // o que aparece escrito na tela ("Toque no O!")
@@ -10,31 +12,40 @@ export type ItemJogo = {
   reforco: string; // o que a voz fala quando acerta
   emoji: string; // desenho que aparece junto do reforço
   palavra: string; // palavra que aparece junto do desenho
-  cor?: string; // só no jogo das cores
+  rotulo?: string; // o que aparece escrito no botão (ex.: a letra). Sem rótulo, o botão é só a cor.
+  cor?: string; // cor do botão (jogo das cores)
+  figura?: string; // desenho grande em cima da pergunta (jogo do som inicial)
 };
 
-export type JogoId = 'vogais' | 'cores';
+export type JogoId = 'vogais' | 'cores' | 'alfabeto' | 'som-inicial';
 
-function vogal(id: string, som: string, palavra: string, emoji: string): ItemJogo {
-  const letra = id.toUpperCase();
+function letraParaTocar(l: Letra): ItemJogo {
   return {
-    id,
-    pedido: `Toque no ${letra}!`,
-    fala: `Toque na letra ${som}!`,
-    nome: `Essa é a letra ${som}.`,
-    reforco: `${som}... de ${palavra.toLowerCase()}!`,
-    emoji,
-    palavra,
+    id: l.letra.toLowerCase(),
+    pedido: `Toque no ${l.letra}!`,
+    fala: `Toque na letra ${l.som}!`,
+    nome: `Essa é a letra ${l.som}.`,
+    reforco: letraDe(l),
+    emoji: l.emoji,
+    palavra: l.palavra,
+    rotulo: l.letra,
   };
 }
 
-export const VOGAIS: ItemJogo[] = [
-  vogal('a', 'á', 'Abelha', '🐝'),
-  vogal('e', 'é', 'Elefante', '🐘'),
-  vogal('i', 'i', 'Igreja', '⛪'),
-  vogal('o', 'ó', 'Ovo', '🥚'),
-  vogal('u', 'u', 'Uva', '🍇'),
-];
+function somInicial(l: Letra): ItemJogo {
+  const palavra = l.palavra.toLowerCase();
+  return {
+    id: l.letra.toLowerCase(),
+    pedido: `Com qual letra começa ${l.palavra.toUpperCase()}?`,
+    fala: `Com qual letra começa a palavra ${palavra}?`,
+    nome: `Essa é a letra ${l.som}.`,
+    reforco: `${l.palavra} começa com a letra ${l.som}!`,
+    emoji: l.emoji,
+    palavra: l.palavra,
+    rotulo: l.letra,
+    figura: l.emoji,
+  };
+}
 
 function cor(id: string, palavra: string, comoO: string, emoji: string, hex: string): ItemJogo {
   return {
@@ -58,7 +69,28 @@ export const CORES: ItemJogo[] = [
   cor('roxo', 'Roxo', 'a uva', '🍇', '#7f4fc9'),
 ];
 
-export const JOGOS: Record<JogoId, { titulo: string; itens: ItemJogo[] }> = {
-  vogais: { titulo: 'Vogais', itens: VOGAIS },
-  cores: { titulo: 'Cores', itens: CORES },
+export type DefinicaoJogo = { titulo: string; itens: ItemJogo[]; instrucao: string };
+
+export const JOGOS: Record<JogoId, DefinicaoJogo> = {
+  vogais: {
+    titulo: 'Vogais',
+    itens: VOGAIS_LETRAS.map(letraParaTocar),
+    instrucao: 'Escute a letra que eu falar e toque nela!',
+  },
+  cores: {
+    titulo: 'Cores',
+    itens: CORES,
+    instrucao: 'Escute a cor que eu falar e toque nela!',
+  },
+  alfabeto: {
+    titulo: 'Desafio do alfabeto',
+    // K, W e Y são raras para 4–5 anos: aparecem para explorar, mas não no desafio.
+    itens: LETRAS.filter((l) => !'KWY'.includes(l.letra)).map(letraParaTocar),
+    instrucao: 'Escute a letra que eu falar e toque nela!',
+  },
+  'som-inicial': {
+    titulo: 'Som inicial',
+    itens: LETRAS.filter((l) => l.inicioClaro).map(somInicial),
+    instrucao: 'Olhe o desenho, escute a palavra e toque na letra que começa ela!',
+  },
 };

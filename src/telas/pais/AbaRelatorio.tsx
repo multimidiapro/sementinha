@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { JOGOS, type ItemJogo, type JogoId } from '../../jogos/conteudo.ts';
+import { JOGOS, type JogoId } from '../../jogos/conteudo.ts';
+import { VOGAIS_LETRAS } from '../../jogos/letras.ts';
+import { PALAVRAS } from '../../jogos/Palavras.tsx';
 import { APRENDIDO_COM, NOMES_ATIVIDADES, type AtividadeId, type Dados, type ProgressoItem } from '../../tipos.ts';
 import { formatarMinutos, ultimosDias } from '../../util/dia.ts';
 import { Cartao, Pilulas } from './ui.tsx';
@@ -42,9 +44,14 @@ export function AbaRelatorio({ dados }: { dados: Dados }) {
 
       <Tempo uso={uso} />
 
-      {(Object.keys(JOGOS) as JogoId[]).map((jogo) => (
-        <Jogo key={jogo} jogo={jogo} progresso={progresso} />
+      {SECOES.map((secao) => (
+        <Secao key={secao.prefixo} secao={secao} progresso={progresso} />
       ))}
+      {!SECOES.some((secao) => secao.itens.some((item) => progresso[chave(secao, item)])) && (
+        <Cartao titulo="🎮 Jogos">
+          <p className="text-sm text-slate-500">Ainda não jogou. Quando jogar, o que aprendeu aparece aqui.</p>
+        </Cartao>
+      )}
 
       <Vistos vistos={vistos} dados={dados} />
 
@@ -97,42 +104,61 @@ function Tempo({ uso }: { uso: Dados['uso'][string] }) {
   );
 }
 
-function Jogo({ jogo, progresso }: { jogo: JogoId; progresso: Record<string, ProgressoItem> }) {
-  const { titulo, itens } = JOGOS[jogo];
-  const linhas = itens.map((item) => ({ item, p: progresso[`${jogo}:${item.id}`], s: situacao(progresso[`${jogo}:${item.id}`]) }));
-  const nomeItem = (item: ItemJogo) => (jogo === 'vogais' ? item.id.toUpperCase() : item.palavra);
-  const aprendeu = linhas.filter((l) => l.s === 'aprendeu').map((l) => nomeItem(l.item));
-  const praticar = linhas.filter((l) => l.s === 'praticar').map((l) => nomeItem(l.item));
+// Cada brincadeira que guarda acertos aparece no relatório com os seus itens.
+type ItemRelatorio = { id: string; rotulo: string; cor?: string };
+type SecaoRelatorio = { prefixo: string; titulo: string; itens: ItemRelatorio[] };
+
+const SECOES: SecaoRelatorio[] = [
+  ...(Object.keys(JOGOS) as JogoId[]).map((id) => ({
+    prefixo: id,
+    titulo: id === 'alfabeto' ? 'Alfabeto (desafio)' : JOGOS[id].titulo,
+    itens: JOGOS[id].itens.map((i) => ({ id: i.id, rotulo: i.rotulo ?? i.palavra, cor: i.cor })),
+  })),
+  { prefixo: 'baloes', titulo: 'Estoura balões', itens: VOGAIS_LETRAS.map((l) => ({ id: l.letra.toLowerCase(), rotulo: l.letra })) },
+  { prefixo: 'palavras', titulo: 'Monta palavras', itens: PALAVRAS.map((p) => ({ id: p.id, rotulo: p.palavra })) },
+];
+
+const chave = (secao: SecaoRelatorio, item: ItemRelatorio) => `${secao.prefixo}:${item.id}`;
+
+function Secao({ secao, progresso }: { secao: SecaoRelatorio; progresso: Record<string, ProgressoItem> }) {
+  const linhas = secao.itens.map((item) => {
+    const p = progresso[chave(secao, item)];
+    return { item, p, s: situacao(p) };
+  });
+  const vistas = linhas.filter((l) => l.s !== 'nada');
+  if (vistas.length === 0) return null;
+  // Listas grandes (alfabeto) mostram só o que a criança já viu.
+  const grande = linhas.length > 8;
+  const mostrar = grande ? vistas : linhas;
+  const aprendeu = linhas.filter((l) => l.s === 'aprendeu').map((l) => l.item.rotulo);
+  const praticar = linhas.filter((l) => l.s === 'praticar').map((l) => l.item.rotulo);
 
   return (
-    <Cartao titulo={`🎮 ${titulo}`}>
-      {linhas.every((l) => l.s === 'nada') ? (
-        <p className="text-sm text-slate-500">Ainda não jogou.</p>
-      ) : (
-        <p className="text-sm text-slate-600">
-          {aprendeu.length > 0 && (
-            <>
-              Já aprendeu: <b>{aprendeu.join(', ')}</b>.{' '}
-            </>
-          )}
-          {praticar.length > 0 && (
-            <>
-              Precisa praticar: <b>{praticar.join(', ')}</b>.
-            </>
-          )}
-          {aprendeu.length === 0 && praticar.length === 0 && 'Está praticando. Continue assim!'}
-        </p>
-      )}
+    <Cartao titulo={`🎮 ${secao.titulo}`}>
+      <p className="text-sm text-slate-600">
+        {aprendeu.length > 0 && (
+          <>
+            Já aprendeu: <b>{aprendeu.join(', ')}</b>.{' '}
+          </>
+        )}
+        {praticar.length > 0 && (
+          <>
+            Precisa praticar: <b>{praticar.join(', ')}</b>.{' '}
+          </>
+        )}
+        {aprendeu.length === 0 && praticar.length === 0 && 'Está praticando. Continue assim! '}
+        {grande && `Já viu ${vistas.length} de ${linhas.length}.`}
+      </p>
 
       <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {linhas.map(({ item, p, s }) => (
+        {mostrar.map(({ item, p, s }) => (
           <li key={item.id} className={`flex items-center gap-2 rounded-xl p-2 ring-1 ${SITUACOES[s].cor}`}>
-            {jogo === 'vogais' ? (
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-2xl font-black text-folha-escura">
-                {item.id.toUpperCase()}
-              </span>
-            ) : (
+            {item.cor ? (
               <span className="h-10 w-10 shrink-0 rounded-lg" style={{ background: item.cor }} />
+            ) : (
+              <span className="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-lg bg-white px-1 text-lg font-black text-folha-escura">
+                {item.rotulo}
+              </span>
             )}
             <div className="min-w-0 text-xs leading-tight">
               <p className="font-bold">

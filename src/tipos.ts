@@ -30,7 +30,7 @@ export type Video = {
 } & ({ origem: 'arquivo'; duracao: number } | { origem: 'youtube'; youtubeId: string });
 
 /** O que dá para ligar e desligar na salinha. */
-export type AtividadeId = 'vogais' | 'cores' | 'videos';
+export type AtividadeId = 'vogais' | 'alfabeto' | 'som-inicial' | 'baloes' | 'palavras' | 'memoria' | 'cores' | 'videos';
 
 /** Segundos de uso num dia: total e por atividade. */
 export type UsoDia = { total: number } & Partial<Record<AtividadeId, number>>;
@@ -66,6 +66,11 @@ export const CATEGORIAS: Record<Categoria, { nome: string; icone: string }> = {
 
 export const NOMES_ATIVIDADES: Record<AtividadeId, string> = {
   vogais: 'Vogais',
+  alfabeto: 'Alfabeto A–Z',
+  'som-inicial': 'Som inicial',
+  baloes: 'Estoura balões',
+  palavras: 'Monta palavras',
+  memoria: 'Jogo da memória',
   cores: 'Cores',
   videos: 'Vídeos',
 };

@@ -69,6 +69,28 @@ body {
   to { transform: translateY(105vh) rotate(540deg); opacity: 0.8; }
 }
 
+@keyframes flutuar {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-18px) rotate(2deg); }
+}
+@keyframes estourar {
+  0% { transform: scale(1); opacity: 1; }
+  40% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(0.2); opacity: 0; }
+}
+@keyframes subir {
+  from { transform: translateY(60vh); }
+  to { transform: translateY(0); }
+}
+@keyframes virar {
+  from { transform: rotateY(90deg); }
+  to { transform: rotateY(0deg); }
+}
+
+.anim-flutuar { animation: flutuar 2.6s ease-in-out infinite; }
+.anim-estourar { animation: estourar 0.45s ease-out forwards; }
+.anim-subir { animation: subir 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.anim-virar { animation: virar 0.25s ease-out both; }
 .anim-tremer { animation: tremer 0.45s ease-in-out; }
 .anim-festa { animation: festa 0.45s ease-out both; }
 .anim-cair { animation: cair 1.8s linear forwards; }
@@ -77,5 +99,5 @@ body {
 .anim-aparecer { animation: aparecer 0.35s ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .anim-balancar, .anim-pular, .anim-aparecer, .anim-tremer, .anim-festa, .anim-cair { animation: none; }
+  .anim-balancar, .anim-pular, .anim-aparecer, .anim-tremer, .anim-festa, .anim-cair, .anim-flutuar, .anim-subir, .anim-virar { animation: none; }
 }
