@@ -54,10 +54,28 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes tremer {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+@keyframes festa {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes cair {
+  from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  to { transform: translateY(105vh) rotate(540deg); opacity: 0.8; }
+}
+
+.anim-tremer { animation: tremer 0.45s ease-in-out; }
+.anim-festa { animation: festa 0.45s ease-out both; }
+.anim-cair { animation: cair 1.8s linear forwards; }
 .anim-balancar { animation: balancar 3s ease-in-out infinite; transform-origin: 50% 100%; }
 .anim-pular { animation: pular 0.6s ease-out; }
 .anim-aparecer { animation: aparecer 0.35s ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .anim-balancar, .anim-pular, .anim-aparecer { animation: none; }
+  .anim-balancar, .anim-pular, .anim-aparecer, .anim-tremer, .anim-festa, .anim-cair { animation: none; }
 }

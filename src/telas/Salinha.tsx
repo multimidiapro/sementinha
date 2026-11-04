@@ -1,26 +1,52 @@
 import { useEffect, useState } from 'react';
 import { Brotinho } from '../componentes/Brotinho.tsx';
-import type { Perfil } from '../tipos.ts';
+import type { Perfil, ProgressoItem } from '../tipos.ts';
 import { falar } from '../util/voz.ts';
 import { travarSalinha } from '../util/travar.ts';
+import { Jogo } from '../jogos/Jogo.tsx';
+import type { JogoId } from '../jogos/conteudo.ts';
 
-type Props = { perfil: Perfil; aoChamarPais: () => void };
+type Props = {
+  perfil: Perfil;
+  progresso: Record<string, ProgressoItem>;
+  aoResponder: (chave: string, certoDePrimeira: boolean, errou: boolean) => void;
+  aoGanharEstrela: () => void;
+  aoChamarPais: () => void;
+};
 
-const ATIVIDADES = [
-  { id: 'vogais', titulo: 'Vogais', desenho: 'AEIOU', fundo: 'bg-folha', fala: 'Vogais! Esse jogo está chegando.' },
-  { id: 'cores', titulo: 'Cores', desenho: '🎨', fundo: 'bg-sol', fala: 'Cores! Esse jogo está chegando.' },
+const ATIVIDADES: { id: string; jogo?: JogoId; titulo: string; desenho: string; fundo: string; fala: string }[] = [
+  { id: 'vogais', jogo: 'vogais', titulo: 'Vogais', desenho: 'AEIOU', fundo: 'bg-folha', fala: 'Vamos brincar com as vogais!' },
+  { id: 'cores', jogo: 'cores', titulo: 'Cores', desenho: '🎨', fundo: 'bg-sol', fala: 'Vamos brincar com as cores!' },
   { id: 'videos', titulo: 'Vídeos', desenho: '▶', fundo: 'bg-ceu', fala: 'Vídeos! Já, já tem vídeo aqui.' },
 ];
 
-export function Salinha({ perfil, aoChamarPais }: Props) {
+export function Salinha({ perfil, progresso, aoResponder, aoGanharEstrela, aoChamarPais }: Props) {
   const [tocado, setTocado] = useState<string | null>(null);
+  const [jogo, setJogo] = useState<JogoId | null>(null);
 
+  // A trava fica ligada a salinha inteira, inclusive dentro dos jogos.
   useEffect(() => travarSalinha(), []);
 
-  function tocar(id: string, fala: string) {
+  function tocar(id: string, fala: string, jogoId?: JogoId) {
     setTocado(id);
     falar(fala);
-    setTimeout(() => setTocado(null), 650);
+    window.setTimeout(() => {
+      setTocado(null);
+      if (jogoId) setJogo(jogoId);
+    }, 650);
+  }
+
+  if (jogo) {
+    return (
+      <Jogo
+        jogo={jogo}
+        estrelas={perfil.estrelas}
+        progresso={progresso}
+        aoResponder={aoResponder}
+        aoGanharEstrela={aoGanharEstrela}
+        aoSair={() => setJogo(null)}
+      />
+    );
   }
 
   return (
@@ -53,7 +79,7 @@ export function Salinha({ perfil, aoChamarPais }: Props) {
         {ATIVIDADES.map((a, i) => (
           <button
             key={a.id}
-            onClick={() => tocar(a.id, a.fala)}
+            onClick={() => tocar(a.id, a.fala, a.jogo)}
             style={{ animationDelay: `${i * 80}ms` }}
             className={`anim-aparecer ${a.fundo} flex aspect-[4/3] flex-col items-center justify-center rounded-[2rem] border-b-8 border-black/15 text-white shadow-lg transition active:translate-y-1 active:border-b-4 sm:aspect-square`}
           >

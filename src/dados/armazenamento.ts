@@ -3,7 +3,7 @@
 import type { Dados } from '../tipos.ts';
 
 const CHAVE = 'sementinha:v1';
-const VAZIO: Dados = { perfis: [], perfilAtivoId: null };
+export const VAZIO: Dados = { perfis: [], perfilAtivoId: null, progresso: {} };
 
 export function lerDados(): Dados {
   try {
@@ -13,6 +13,7 @@ export function lerDados(): Dados {
     return {
       perfis: Array.isArray(dados.perfis) ? dados.perfis : [],
       perfilAtivoId: typeof dados.perfilAtivoId === 'string' ? dados.perfilAtivoId : null,
+      progresso: dados.progresso && typeof dados.progresso === 'object' ? dados.progresso : {},
     };
   } catch {
     return VAZIO;
