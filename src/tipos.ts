@@ -18,14 +18,16 @@ export type ProgressoItem = {
 
 export type Categoria = 'biblico' | 'educativo' | 'util';
 
-/** Vídeo do YouTube escolhido pelos pais. Vale para todos os filhos. */
+/**
+ * Vídeo escolhido pelos pais. Vale para todos os filhos.
+ * "arquivo": guardado no aparelho, toca sem internet. "youtube": só com internet.
+ */
 export type Video = {
   id: string;
-  youtubeId: string;
   titulo: string;
   categoria: Categoria;
   ativo: boolean;
-};
+} & ({ origem: 'arquivo'; duracao: number } | { origem: 'youtube'; youtubeId: string });
 
 /** O que dá para ligar e desligar na salinha. */
 export type AtividadeId = 'vogais' | 'cores' | 'videos';

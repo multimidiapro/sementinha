@@ -8,6 +8,11 @@
 - App instalável: PWA na v1; Play Store (via Capacitor, com startLockTask p/ fixar tela) na v2.
 - Endereço: **subdomínio sementinha.joaopaulooliveira.com** (decidido pelo dono). Criar como app Node próprio na Hostinger só na etapa de deploy.
 
+## Decisão de 2026-11-04: funcionar sem internet
+- O app inteiro funciona sem internet (PWA com cópia guardada no aparelho).
+- Vídeos: o padrão são **arquivos do próprio aparelho** (MP4 escolhido pelos pais, guardado no IndexedDB), que tocam sem internet num player 100% do app, em galeria e tela cheia.
+- YouTube continua como opção, só com internet: sem controles nem sugestões, mas a marca do YouTube fica (regra deles; não dá para baixar nem esconder o logo).
+
 ## Entra na v1
 1. Sala LeComigo: jogos **Vogais** e **Cores**. App fala (voz do aparelho, speechSynthesis), criança TOCA na tela (sem microfone). Festa + estrelinha ao acertar.
 2. Vídeos: só links do YouTube colados pelos pais; youtube-nocookie; ao terminar, fecha o player e mostra tela própria (sem sugestões).

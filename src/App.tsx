@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { VAZIO, apagarTudo, lerDados, novoId, salvarDados } from './dados/armazenamento.ts';
+import { apagarArquivo, apagarTodosArquivos } from './dados/arquivos.ts';
 import type { AtividadeId, Dados, Perfil, ProgressoItem } from './tipos.ts';
 import { Salinha } from './telas/Salinha.tsx';
 import { PortaDosPais } from './telas/PortaDosPais.tsx';
@@ -91,9 +92,12 @@ export default function App() {
         const doPerfil = d.extras[id] ?? {};
         return { ...d, extras: { ...d.extras, [id]: { ...doPerfil, [hoje]: (doPerfil[hoje] ?? 0) + minutos } } };
       }),
-    adicionarVideo: (v) => setDados((d) => ({ ...d, videos: [...d.videos, { ...v, id: novoId(), ativo: true }] })),
+    adicionarVideo: (v) => setDados((d) => ({ ...d, videos: [...d.videos, v] })),
     alternarVideo: (id) => setDados((d) => ({ ...d, videos: d.videos.map((v) => (v.id === id ? { ...v, ativo: !v.ativo } : v)) })),
-    removerVideo: (id) => setDados((d) => ({ ...d, videos: d.videos.filter((v) => v.id !== id) })),
+    removerVideo: (id) => {
+      apagarArquivo(id).catch(() => {});
+      setDados((d) => ({ ...d, videos: d.videos.filter((v) => v.id !== id) }));
+    },
     alternarAtividade: (id) =>
       setDados((d) => ({
         ...d,
@@ -101,6 +105,7 @@ export default function App() {
       })),
     apagarTudo: () => {
       apagarTudo();
+      apagarTodosArquivos().catch(() => {});
       setDados(VAZIO);
     },
   };

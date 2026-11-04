@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { AtividadeId, Categoria, Dados, Perfil } from '../../tipos.ts';
+import type { AtividadeId, Dados, Perfil, Video } from '../../tipos.ts';
 import { AbaCriancas } from './AbaCriancas.tsx';
 import { AbaVideos } from './AbaVideos.tsx';
 import { AbaRelatorio } from './AbaRelatorio.tsx';
@@ -12,7 +12,7 @@ export type AcoesPais = {
   removerPerfil: (perfilId: string) => void;
   comecar: (perfilId: string) => void;
   darMinutos: (perfilId: string, minutos: number) => void;
-  adicionarVideo: (v: { youtubeId: string; titulo: string; categoria: Categoria }) => void;
+  adicionarVideo: (v: Video) => void;
   alternarVideo: (videoId: string) => void;
   removerVideo: (videoId: string) => void;
   alternarAtividade: (id: AtividadeId) => void;

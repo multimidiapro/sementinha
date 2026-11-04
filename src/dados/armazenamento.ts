@@ -27,7 +27,8 @@ export function lerDados(): Dados {
       perfis: Array.isArray(d.perfis) ? d.perfis : [],
       perfilAtivoId: typeof d.perfilAtivoId === 'string' ? d.perfilAtivoId : null,
       progresso: ehObjeto(d.progresso) ? d.progresso : {},
-      videos: Array.isArray(d.videos) ? d.videos : [],
+      // Vídeos da versão anterior eram todos do YouTube.
+      videos: Array.isArray(d.videos) ? d.videos.map((v) => ({ ...v, origem: v.origem ?? 'youtube' }) as Dados['videos'][number]) : [],
       desligados: Array.isArray(d.desligados) ? d.desligados : [],
       uso: ehObjeto(d.uso) ? d.uso : {},
       extras: ehObjeto(d.extras) ? d.extras : {},

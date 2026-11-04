@@ -26,12 +26,19 @@ app.use(
       : {
           directives: {
             'default-src': ["'self'"],
-            'img-src': ["'self'", 'data:', 'https://i.ytimg.com'],
+            'img-src': ["'self'", 'data:', 'blob:', 'https://i.ytimg.com'],
+            // Vídeos guardados no aparelho tocam por endereço "blob:".
+            'media-src': ["'self'", 'blob:'],
+            'worker-src': ["'self'"],
+            'manifest-src': ["'self'"],
             'frame-src': ['https://www.youtube-nocookie.com'],
             'style-src': ["'self'", "'unsafe-inline'"],
             'script-src': ["'self'"],
             'font-src': ["'self'"],
             'connect-src': ["'self'"],
+            // A Hostinger já força https. Com esta regra ligada, o modo sem internet não instala
+            // quando o app roda em http (no computador, para testar).
+            'upgrade-insecure-requests': null,
           },
         },
   }),

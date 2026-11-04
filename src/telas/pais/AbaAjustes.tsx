@@ -33,7 +33,7 @@ export function AbaAjustes({ desligados, acoes }: { desligados: AtividadeId[]; a
 
       <Cartao titulo="🛡️ Privacidade" className="text-sm leading-relaxed">
         <p className="text-slate-600">
-          Sem propaganda, sem chat e sem rastreador. Da criança, só guardamos apelido, bichinho, estrelinhas, acertos nos jogos e tempo de uso.
+          Sem propaganda, sem chat e sem rastreador. Da criança, só guardamos apelido, bichinho, estrelinhas, acertos nos jogos e tempo de uso. Os vídeos que você escolhe do aparelho também ficam só nele.
           Por enquanto tudo fica <b>só neste aparelho</b>.
         </p>
         <button
