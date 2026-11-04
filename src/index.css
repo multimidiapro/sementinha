@@ -1,0 +1,63 @@
+@import '@fontsource-variable/nunito';
+@import 'tailwindcss';
+
+/* Estilo Jardim: verde-folha, amarelo-sol e azul-céu, sobre verde bem clarinho. */
+@theme {
+  --font-sans: 'Nunito Variable', ui-rounded, system-ui, sans-serif;
+  --color-folha: #639922;
+  --color-folha-escura: #27500a;
+  --color-folha-funda: #173404;
+  --color-broto: #c0dd97;
+  --color-grama: #eaf3de;
+  --color-sol: #ef9f27;
+  --color-sol-claro: #fac775;
+  --color-sol-escuro: #633806;
+  --color-ceu: #378add;
+  --color-ceu-claro: #e6f1fb;
+  --color-ceu-escuro: #0c447c;
+  --color-terra: #854f0b;
+  --color-terra-clara: #ba7517;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-grama);
+  color: var(--color-folha-funda);
+  /* Sem puxar para atualizar, sem selecionar texto e sem destaque azul ao tocar. */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sem-selecao {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@keyframes balancar {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@keyframes pular {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+}
+@keyframes aparecer {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.anim-balancar { animation: balancar 3s ease-in-out infinite; transform-origin: 50% 100%; }
+.anim-pular { animation: pular 0.6s ease-out; }
+.anim-aparecer { animation: aparecer 0.35s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-balancar, .anim-pular, .anim-aparecer { animation: none; }
+}
